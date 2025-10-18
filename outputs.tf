@@ -88,7 +88,6 @@ output "db_password" {
   sensitive   = true
 }
 
-
 ###########################
 #### High Availablilty ####
 ###########################
@@ -112,10 +111,10 @@ output "db_allocated_storage" {
   value       = azurerm_postgresql_flexible_server.postgres.storage_mb
 }
 
-
 ########################
 ####    Firewall    ####
 ########################
+
 output "db_firewall_rules" {
   description = "Database Firewall Rules."
   value       = azurerm_postgresql_flexible_server_firewall_rule.firewall

@@ -8,7 +8,6 @@ locals {
   # Determine if the db_engine is set to mysql. If true then create a list of all the maintenance strings, if false then create an empty list. This list is referenced to determine the length which acts like a flag for the dynamic block
   maintenance_flag = var.db_engine == "postgres" ? compact([var.db_maintenance_day, var.db_maintenance_hour, var.db_maintenance_minute]) : []
 
-
   # Firewall rules that are converted from a list of a map. Setting the name of the rule to the key and reconstructing it so we can use for_each instead of count
   firewall_rules = {
     for rule, value in var.db_firewall_rules : value.name => {
@@ -38,10 +37,10 @@ resource "azurerm_postgresql_flexible_server" "postgres" {
   backup_retention_days        = var.db_backup_retention_period
   geo_redundant_backup_enabled = var.db_geo_backup_enabled
 
-  zone                = var.db_zone
-  private_dns_zone_id = var.db_private_dns_zone_id
-  delegated_subnet_id = var.db_private_dns_zone_id != null ? var.db_delegated_subnet_id : null
-  public_network_access_enabled = var.db_delegated_subnet_id != null && var.db_private_dns_zone_id != null ? false : true
+  zone                              = var.db_zone
+  private_dns_zone_id               = var.db_private_dns_zone_id
+  delegated_subnet_id               = var.db_private_dns_zone_id != null ? var.db_delegated_subnet_id : null
+  public_network_access_enabled     = var.db_delegated_subnet_id != null && var.db_private_dns_zone_id != null ? false : true
   source_server_id                  = var.db_create_source_id
   point_in_time_restore_time_in_utc = var.db_create_mode == "PointInTimeRestore" && var.db_create_source_id != null ? var.db_restore_time : null
 
@@ -67,7 +66,6 @@ resource "azurerm_postgresql_flexible_server" "postgres" {
     delete = var.db_timeouts.delete
     update = var.db_timeouts.update
   }
-
 }
 
 resource "azurerm_postgresql_flexible_server_database" "postgres" {

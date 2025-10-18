@@ -310,7 +310,6 @@ variable "db_engine" {
   default = "postgres"
 }
 
-
 variable "tags" {
   description = "Tags to apply to the Database Server"
   type        = map(string)
