@@ -229,6 +229,18 @@ variable "db_allocated_storage" {
   default     = 2097152
 }
 
+variable "storage_tier" {
+  description = "The name of storage performance tier for IOPS. Default value is dependant on the storage_mb value. Check https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server#storage_tier-defaults-based-on-storage_mb for more information."
+  type        = string
+  default     = null
+}
+
+variable "auto_grow_enabled" {
+  description = "Turn storage auto growth option on/off. Read more for specifics on https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-auto-grow-storage"
+  type        = bool
+  default     = false
+}
+
 variable "db_create_mode" {
   description = "The creation mode which can be used to restore or replicate existing servers."
   type        = string

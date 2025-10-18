@@ -30,8 +30,12 @@ resource "azurerm_postgresql_flexible_server" "postgres" {
   administrator_password = var.db_password
   create_mode            = var.db_create_mode
   sku_name               = var.db_server_sku
-  storage_mb             = var.db_allocated_storage
   tags                   = var.tags
+
+  # Storage
+  storage_mb        = var.db_allocated_storage
+  storage_tier      = var.storage_tier
+  auto_grow_enabled = var.auto_grow_enabled
 
   # Backups
   backup_retention_days        = var.db_backup_retention_period
