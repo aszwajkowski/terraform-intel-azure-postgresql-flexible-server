@@ -15,6 +15,8 @@ locals {
       end_ip_address   = value.end_ip_address
     }
   }
+
+  public_network_access_enabled = var.private_endpoints != null || (var.db_delegated_subnet_id != null && var.db_private_dns_zone_id != null) ? false : true
 }
 
 data "azurerm_resource_group" "rg" {
@@ -44,7 +46,7 @@ resource "azurerm_postgresql_flexible_server" "postgres" {
   zone                              = var.db_zone
   private_dns_zone_id               = var.db_private_dns_zone_id
   delegated_subnet_id               = var.db_private_dns_zone_id != null ? var.db_delegated_subnet_id : null
-  public_network_access_enabled     = var.db_delegated_subnet_id != null && var.db_private_dns_zone_id != null ? false : true
+  public_network_access_enabled     = local.public_network_access_enabled
   source_server_id                  = var.db_create_source_id
   point_in_time_restore_time_in_utc = var.db_create_mode == "PointInTimeRestore" && var.db_create_source_id != null ? var.db_restore_time : null
 

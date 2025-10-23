@@ -355,3 +355,42 @@ variable "db_firewall_rules" {
   }))
   default = []
 }
+
+variable "private_endpoints" {
+  description = <<DESCRIPTION
+A map of private endpoints to create on the Flexible Server. The map key is deliberately arbitrary to avoid issues where map keys may be unknown at plan time.
+
+- `name` - (Optional) The name of the private endpoint. If not set, one will be generated with `pe-<db_server_name>` convention. Changing this forces a new resource to be created.
+- `resource_group_name` - (Optional) The name of the resource group within which the private endpoint will be created. Defaults to the resource group name of the Flexible Server. Changing this forces a new resource to be created.
+- `location` - (Optional) The supported Azure location where the resources will be deployed. Defaults to the location of the resource group of the Flexible Server. Changing this forces a new resource to be created.
+- `subnet_id` - (Required) The ID of the subnet from which private IP addresses will be allocated for this private endpoint. Changing this forces a new resource to be created.
+- `custom_network_interface_name` - (Optional) The custom name of the network interface attached to the private endpoint. Changing this forces a new resource to be created.
+- `tags` - (Optional) A mapping of tags to assign to the resource.
+- `private_service_connection_name` - (Optional) The name of the private service connection. If not set, one will be generated with `pse-<db_server_name>` convention. Changing this forces a new resource to be created.
+- `private_dns_zone_group` - (Optional) Private DNS zone group to associate with the private endpoint. DNS records must be managed externally to this module.
+  - `name` - (Optional) The name of the private DNS zone group.
+  - `private_dns_zone_ids` - (Optional) A set of private DNS zones IDs to include within the private DNS zone group.
+- `ip_configurations` - (Optional) A map of IP configurations to create on the private endpoint. The map key is deliberately arbitrary to avoid issues where map keys may be unknown at plan time.
+  - `name` - The name of the IP configuration. Changing this forces a new resource to be created.
+  - `private_ip_address` - The private IP address within the private endpoint's subnet to be used. Changing this forces a new resource to be created.
+DESCRIPTION
+  type = map(object({
+    name                            = optional(string, null)
+    resource_group_name             = optional(string, null)
+    location                        = optional(string, null)
+    subnet_id                       = string
+    custom_network_interface_name   = optional(string, null)
+    tags                            = optional(map(string), null)
+    private_service_connection_name = optional(string, null)
+    private_dns_zone_group = optional(object({
+      name                 = string
+      private_dns_zone_ids = set(string)
+    }), null)
+    ip_configurations = optional(map(object({
+      name               = string
+      private_ip_address = string
+    })), {})
+  }))
+  default  = {}
+  nullable = false
+}

@@ -161,3 +161,17 @@ output "db_create_source_id" {
   description = "For creation modes other than Default, the source server ID to use."
   value       = azurerm_postgresql_flexible_server.postgres.source_server_id
 }
+
+###########################
+#### Private Endpoints ####
+###########################
+
+output "private_endpoints_manage_dns_zone_groups" {
+  description = "A map of private endpoints with managed private DNS zone groups. The map value is the entire azurerm_private_endpoint resource."
+  value       = azurerm_private_endpoint.this_manage_private_dns_zone_group
+}
+
+output "private_endpoints_unmanaged_dns_zone_groups" {
+  description = "A map of private endpoints with unmanaged private DNS zone groups. The map value is the entire azurerm_private_endpoint resource."
+  value       = azurerm_private_endpoint.this_unmanaged_private_dns_zone_group
+}
