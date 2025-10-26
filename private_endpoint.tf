@@ -1,3 +1,15 @@
+locals {
+  private_endpoints_role_assignments = { for ra in flatten([
+    for pe_k, pe_v in var.private_endpoints : [
+      for ra_k, ra_v in pe_v.role_assignments : {
+        private_endpoint_key = pe_k
+        role_assignment_key  = ra_k
+        role_assignment      = ra_v
+      }
+    ]
+  ]) : "${ra.private_endpoint_key}-${ra.role_assignment_key}" => ra }
+}
+
 resource "azurerm_private_endpoint" "this_manage_private_dns_zone_group" {
   for_each = { for k, v in var.private_endpoints : k => v if v.private_dns_zone_group != null }
 
@@ -63,4 +75,20 @@ resource "azurerm_private_endpoint" "this_unmanaged_private_dns_zone_group" {
   lifecycle {
     ignore_changes = [private_dns_zone_group]
   }
+}
+
+resource "azurerm_role_assignment" "private_endpoint" {
+  for_each = local.private_endpoints_role_assignments
+
+  name                                   = each.value.role_assignment.name
+  scope                                  = try(azurerm_private_endpoint.this_manage_private_dns_zone_group[each.value.private_endpoint_key].id, azurerm_private_endpoint.this_unmanaged_private_dns_zone_group[each.value.private_endpoint_key].id)
+  role_definition_id                     = strcontains(lower(each.value.role_assignment.role_definition_id_or_name), lower(local.role_definition_id_substring)) ? each.value.role_assignment.role_definition_id_or_name : null
+  role_definition_name                   = strcontains(lower(each.value.role_assignment.role_definition_id_or_name), lower(local.role_definition_id_substring)) ? null : each.value.role_assignment.role_definition_id_or_name
+  principal_id                           = each.value.role_assignment.principal_id
+  principal_type                         = each.value.role_assignment.principal_type
+  condition                              = each.value.role_assignment.condition
+  condition_version                      = each.value.role_assignment.condition_version
+  delegated_managed_identity_resource_id = each.value.role_assignment.delegated_managed_identity_resource_id
+  description                            = each.value.role_assignment.description
+  skip_service_principal_aad_check       = each.value.role_assignment.skip_service_principal_aad_check
 }

@@ -17,6 +17,8 @@ locals {
   }
 
   public_network_access_enabled = var.private_endpoints != null || (var.db_delegated_subnet_id != null && var.db_private_dns_zone_id != null) ? false : true
+  
+  role_definition_id_substring = "/providers/Microsoft.Authorization/roleDefinitions"
 }
 
 data "azurerm_resource_group" "rg" {
@@ -101,4 +103,20 @@ resource "azurerm_postgresql_flexible_server_configuration" "postgres" {
   name      = each.key
   server_id = azurerm_postgresql_flexible_server.postgres.id
   value     = each.value.value
+}
+
+resource "azurerm_role_assignment" "postgres" {
+  for_each = var.role_assignments
+
+  name                                   = each.value.name
+  scope                                  = azurerm_postgresql_flexible_server.postgres.id
+  role_definition_id                     = strcontains(lower(each.value.role_definition_id_or_name), lower(local.role_definition_id_substring)) ? each.value.role_definition_id_or_name : null
+  role_definition_name                   = strcontains(lower(each.value.role_definition_id_or_name), lower(local.role_definition_id_substring)) ? null : each.value.role_definition_id_or_name
+  principal_id                           = each.value.principal_id
+  principal_type                         = each.value.principal_type
+  condition                              = each.value.condition
+  condition_version                      = each.value.condition_version
+  delegated_managed_identity_resource_id = each.value.delegated_managed_identity_resource_id
+  description                            = each.value.description
+  skip_service_principal_aad_check       = each.value.skip_service_principal_aad_check
 }

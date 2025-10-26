@@ -373,6 +373,7 @@ A map of private endpoints to create on the Flexible Server. The map key is deli
 - `ip_configurations` - (Optional) A map of IP configurations to create on the private endpoint. The map key is deliberately arbitrary to avoid issues where map keys may be unknown at plan time.
   - `name` - The name of the IP configuration. Changing this forces a new resource to be created.
   - `private_ip_address` - The private IP address within the private endpoint's subnet to be used. Changing this forces a new resource to be created.
+- `role_assignments` - (Optional) A map of role assignments to create on the resource. The map key is deliberately arbitrary to avoid issues where map keys may be unknown at plan time. See `var.role_assignments` for more information.
 DESCRIPTION
   type = map(object({
     name                            = optional(string, null)
@@ -390,7 +391,47 @@ DESCRIPTION
       name               = string
       private_ip_address = string
     })), {})
+    role_assignments = optional(map(object({
+      name                                   = optional(string, null)
+      role_definition_id_or_name             = string
+      principal_id                           = string
+      principal_type                         = optional(string, null)
+      condition                              = optional(string, null)
+      condition_version                      = optional(string, null)
+      delegated_managed_identity_resource_id = optional(string, null)
+      description                            = optional(string, null)
+      skip_service_principal_aad_check       = optional(bool, false)
+    })), {})
   }))
   default  = {}
   nullable = false
+}
+
+variable "role_assignments" {
+  description = <<DESCRIPTION
+A map of role assignments to create on the Flexible Server. The map key is deliberately arbitrary to avoid issues where map keys may be unknown at plan time.
+
+- `name` - (Optional) The name of the private endpoint. If not set, one will be generated with `pe-<db_server_name>` convention. Changing this forces a new resource to be created.
+- `role_definition_id_or_name` - (Required) The ID or name of the role definition to assign to the principal. Changing this forces a new resource to be created.
+- `principal_id` - (Required) The ID of the principal to assign the role to. Changing this forces a new resource to be created.
+- `principal_type` - (Optional) The type of the principal to assign the role to. Changing this forces a new resource to be created.
+- `condition` - (Optional) The condition which will be used to limit the role assignment. Changing this forces a new resource to be created.
+- `condition_version` - (Optional) The version of the condition syntax. Possible values are '1.0' or 2.0'. Changing this forces a new resource to be created.
+- `delegated_managed_identity_resource_id` - (Optional) The ID of the delegated managed identity to assign the role to. Used in cross tenant scenarios. Changing this forces a new resource to be created.
+- `description` - (Optional) The description of the role assignment. Changing this forces a new resource to be created.
+- `skip_service_principal_aad_check` - (Optional) If set to true, skips the Azure Active Directory check for the service principal in the tenant. Defaults to false.
+DESCRIPTION
+  type = map(object({
+    name                                   = optional(string, null)
+    role_definition_id_or_name             = string
+    principal_id                           = string
+    principal_type                         = optional(string, null)
+    condition                              = optional(string, null)
+    condition_version                      = optional(string, null)
+    delegated_managed_identity_resource_id = optional(string, null)
+    description                            = optional(string, null)
+    skip_service_principal_aad_check       = optional(bool, false)
+  }))
+  default     = {}
+  nullable    = false
 }
